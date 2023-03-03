@@ -19,7 +19,9 @@
 7. [Authors and Acknowledgments](#authors-and-acknowledgments)
 ---
 ## About
-   The ETD will keep all your employee id’s, names, departments, titles, and salaries. 
+   The ETD will keep all your employee id’s, names, departments, titles, and salaries.
+   ![Screen Shot 2023-03-02 at 10 37 02 PM](https://user-images.githubusercontent.com/122688372/222632823-2b1c4675-1a92-4845-b346-7784e2ff2b29.png)
+
 ---
 ## Installation:
   Clone the repo from GitHub using the repo link below.
