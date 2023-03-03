@@ -7,4 +7,12 @@ const question = [
     },
 
 ]
+
+const departmentQuestions = [
+  {
+    type: 'input',
+    message: 'What is the name of the department?',
+    name: 'department',
+  },
+] 
 module.exports = question;

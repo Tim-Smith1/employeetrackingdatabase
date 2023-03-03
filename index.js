@@ -15,11 +15,47 @@ const db = mysql.createConnection(
     console.log(`Connected to the classlist_db database.`)
 );
 
+function initialQ () {
+inquirer.prompt(question)
+.then(ans=>{
+    console.log(ans);
+    // ans.option === "want to try again" ? initialQ() : process.exit();
+    switch (ans.option) {
+        case "Want to try again?":
+            initialQ()
+            break;
+        case "View All Employees":
+            allEmployees();
+            break;
+        case "View All Roles":
+            allRoles();
+            break; 
+        case "View All Departments":
+            allDepartments();
+            break;   
+        case "Update Employee Role":
+            updateEmployeeRole();
+            break;    
+        case "Add Employee":
+            addEmployee();
+            break;
+        case "Add Role":
+            addRole();
+            break;
+        case "Add Department":
+            addDepartment();
+            break;      
+        case "Quit":
+            db.end();
+            process.exit(0);
+    }
+})
+}
+
 init();
 function init(){
     initialQ();
 };
-
 
 function allEmployees() {
     db.query('SELECT * FROM employee', (err, res) => {
@@ -88,134 +124,141 @@ function updateEmployeeRole() {
     }
 
 function addEmployee() {
-        inquirer.prompt({
-            type: 'input',
-            name: 'name',
-            message: 'What is the name of the department?'
-          })
-          .then(({ name }) => {
-            db.query('INSERT INTO department SET ?', { name }, (err, results) => {
-              if (err) throw err;
-              console.log(`${results.affectedRows} department added.`);
-              startApp();
-            });
-          })
-};
+  let managerList = [];
+  let roleList = [];
+  db.query(
+    "SELECT * FROM employee where manager_id is null;",
+    (err, results) => {
+      if (err) throw err;
+      managerList = results.map((employee) => ({
+        name: `${employee.first_name} ${employee.last_name}`,
+        value: employee.id,
+      }));
+      db.query("select * from role;", (err, results) => {
+        if (err) throw err;
+        roleList = results.map((role) => ({
+          name: role.title,
+          value: role.id,
+        }));
 
-function addRole() {
-    inquirer.prompt({
-        type: 'input',
-        name: 'title',
-        message: 'What is the title of the role?'
-    })
-    .then(({ title }) => {
-        db.query('INSERT INTO role SET?', { title }, (err, results) => {
-            if (err) throw err;
-            console.log(`${results.affectedRows} role added.`);
-            startApp();
-        });
-    })
-};
-
-// function addDepartment() {
-//     inquirer.prompt
-//     (deparmentQuestions)
-//    .then(ans =>{
-//     connection.query(`INSERT INTO department (name) VALUES ('${ans.name}')`, function(err) {
-//         if (err) throw err;
-//         console.log(`${ans.name} department added.`)})})};
-   
-
-
-function initialQ () {
-inquirer.prompt(question)
-.then(ans=>{
-    console.log(ans);
-    // ans.option === "want to try again" ? initialQ() : process.exit();
-    switch (ans.option) {
-        case "Want to try again?":
-            initialQ()
-            break;
-        case "View All Employees":
-            allEmployees();
-            break;
-        case "View All Roles":
-            allRoles();
-            break; 
-        case "View All Departments":
-            allDepartments();
-            break;   
-        case "Update Employee Role":
-            updateEmployeeRole();
-            break;    
-        case "Add a Employee":
-            addEmployee();
-            break;
-        case "Add a Role":
-            addRole();
-            break;
-        case "Add a Department":
-            addDepartment();
-            break;
-
-        default:
-            break;
+        inquirer
+          .prompt([
+            {
+              type: "input",
+              name: "first_name",
+              message: "Enter employee first name:",
+            },
+            {
+              type: "input",
+              name: "last_name",
+              message: "Enter employee last name:",
+            },
+            {
+              type: "list",
+              name: "role_id",
+              message: "Enter employee role ID:",
+              choices: roleList,
+            },
+            {
+              type: "list",
+              name: "manager_id",
+              message: "Enter employee manager ID:",
+              choices: managerList,
+            },
+          ])
+          .then((answers) => {
+            const { first_name, last_name, role_id, manager_id } = answers;
+            const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+            db.query(
+              sql,
+              [first_name, last_name, role_id, manager_id],
+              (error, results, fields) => {
+                if (error) console.error(error);
+                return;
+              }
+            );
+            console.log("Employee added successfully!");
+            initialQ();
+          });
+      });
     }
-})
+  );
 }
 
 
+function addRole() {
+    let departmentList = [];
+  
+    db.query("SELECT * FROM department ;", (err, results) => {
+      if (err) throw err;
+      departmentList = results.map((department) => ({
+        name: `${department.name} department`,
+        value: department.id,
+      }));
+      inquirer
+        .prompt([
+          {
+            type: "input",
+            name: "title",
+            message: "What is the role?",
+          },
+          {
+            type: "input",
+            name: "salary",
+            message: "What is the salary?",
+          },
+          {
+            type: "list",
+            name: "department",
+            choices: departmentList,
+            message: "What is the department?",
+          }
+         ] )
+        .then(({ title, salary, department }) => {
+          // Build the SQL insert statement
+          const sql =
+            "insert into role(title,salary,department_id)values (?,?,?);";
+  
+          // Execute the insert statement with the provided parameters
+          db.query(sql, [title, salary, department], (error, results, fields) => {
+            if (error) {
+              // Display an error message to the user if the insert statement fails
+              console.error(error);
+              console.log("Failed to add role");
+            } else {
+              // Display a success message to the user if the insert statement succeeds
+              console.log(`Added role ${title}}`);
+              initialQ();
+            }
+          });
+        });
+    });
+  }
 
-
-
-// function addEmployee() {
-// inquirer.prompt({
-//     type: 'input',
-//     name: 'name',
-//     message: 'What is the name of the department?'
-//   }).then(({ name }) => {
-//     db.query('INSERT INTO department SET ?', { name }, (err, results) => {
-//       if (err) throw err;
-//       console.log(`${results.affectedRows} department added.`);
-//       startApp();
-//     });
-//   })
-// };
-
-//inquirer.prompt({
-    //     type: 'input',
-    //     name: 'name',
-    //     message: 'What is the name of the department?'
-    //   }).then(({ name }) => {
-      
-    //     // Build the SQL insert statement
-    //     const sql = 'INSERT INTO department SET ?';
-        
-    //     // Execute the insert statement with the provided parameters
-    //     connection.query(sql, { name }, (error, results, fields) => {
-    //       if (error) {
-    //         // Display an error message to the user if the insert statement fails
-    //         console.error(error);
-    //         console.log('Failed to add department');
-    //       } else {
-    //         // Display a success message to the user if the insert statement succeeds
-    //         console.log(`Added department ${name}`);
-    //       }
-          
-    //       // Close the database connection
-    //       connection.end();
-    //     });
-    //   });
-    // }
-// inquirer.prompt({
-//     type: 'input',
-//     name: 'name',
-//     message: 'What is the name of the department?'
-//   }).then(({ name }) => {
-//     db.query('INSERT INTO department SET ?', { name }, (err, results) => {
-//       if (err) throw err;
-//       console.log(`${results.affectedRows} department added.`);
-//       startApp();
-//     });
-//   });
-// }
+function addDepartment() {
+    inquirer
+      .prompt({
+        type: "input",
+        name: "name",
+        message: "What is the name of the department?",
+      })
+      .then(({ name }) => {
+        console.log(name);
+        // Build the SQL insert statement
+        const sql = "INSERT INTO department (name) VALUES (?)";
+  
+        // Execute the insert statement with the provided parameters
+        db.query(sql, [name], (error, results, fields) => {
+          if (error) {
+            // Display an error message to the user if the insert statement fails
+            console.error(error);
+            console.log("Failed to add department");
+          } else {
+            // Display a success message to the user if the insert statement succeeds
+            console.log(`Added department ${name}`);
+            initialQ();
+          }
+        });
+      });
+  }
+  
