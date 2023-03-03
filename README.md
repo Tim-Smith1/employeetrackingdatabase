@@ -31,6 +31,11 @@
       git clone https://github.com/Tim-Smith1/employeetrackingdatabase
   
       This app is dependant on -npm i inquirer@8.2.4
+      dependencies: 
+      console.table@0.10.0
+      inquirer@8.2.4
+      mysql2@3.1.2”
+
 ---
 ## Usage
 
@@ -63,6 +68,6 @@ So that I can quickly create a professional README.md file for a new projects
   Tim Smith as well as Study groups and help from TA Sam Adams.
 ---
 ## Contact Information:
-* GitHub Username: timnotreal@gmail.com
-* GitHub Email: Tim-Smith1 
+* GitHub Username: Tim-Smith1
+* GitHub Email:    timnotreal@gmail.com
   
